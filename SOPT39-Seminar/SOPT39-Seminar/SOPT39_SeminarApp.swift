@@ -11,7 +11,11 @@ import SwiftUI
 struct SOPT39_SeminarApp: App {
     var body: some Scene {
         WindowGroup {
+<<<<<<< HEAD
             InstagramFeedView()
+=======
+            InstagramMessageView()
+>>>>>>> origin/feat/#week3
         }
     }
 }

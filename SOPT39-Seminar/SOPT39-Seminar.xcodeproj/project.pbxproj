@@ -8,11 +8,29 @@
 
 /* Begin PBXFileReference section */
 		3B7AB89B3070C62A00CEC5EB /* SOPT39-Seminar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SOPT39-Seminar.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A9C2D7E51031202600000001 /* SOPT39-Seminar/week4/Config/Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "SOPT39-Seminar/week4/Config/Config.xcconfig"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		3B04BD053095CB6B00A4C0D5 /* Exceptions for "SOPT39-Seminar" folder in "SOPT39-Seminar" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				week2/Instagram/InstagramFeedView.swift,
+				week2/Instagram/PostCardView.swift,
+				week2/Instagram/PostModel.swift,
+				week2/Instagram/PostProfileHeaderView.swift,
+			);
+			target = 3B7AB89A3070C62A00CEC5EB /* SOPT39-Seminar */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		3B7AB89D3070C62A00CEC5EB /* SOPT39-Seminar */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3B04BD053095CB6B00A4C0D5 /* Exceptions for "SOPT39-Seminar" folder in "SOPT39-Seminar" target */,
+			);
 			path = "SOPT39-Seminar";
 			sourceTree = "<group>";
 		};
@@ -32,6 +50,7 @@
 		3B7AB8923070C62A00CEC5EB = {
 			isa = PBXGroup;
 			children = (
+				A9C2D7E51031202600000001 /* SOPT39-Seminar/week4/Config/Config.xcconfig */,
 				3B7AB89D3070C62A00CEC5EB /* SOPT39-Seminar */,
 				3B7AB89C3070C62A00CEC5EB /* Products */,
 			);
@@ -250,6 +269,7 @@
 		};
 		3B7AB8A73070C62C00CEC5EB /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A9C2D7E51031202600000001 /* SOPT39-Seminar/week4/Config/Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -258,6 +278,7 @@
 				DEVELOPMENT_TEAM = U5HVN36M83;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "SOPT39-Seminar/Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -282,6 +303,7 @@
 		};
 		3B7AB8A83070C62C00CEC5EB /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A9C2D7E51031202600000001 /* SOPT39-Seminar/week4/Config/Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -290,6 +312,7 @@
 				DEVELOPMENT_TEAM = U5HVN36M83;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "SOPT39-Seminar/Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

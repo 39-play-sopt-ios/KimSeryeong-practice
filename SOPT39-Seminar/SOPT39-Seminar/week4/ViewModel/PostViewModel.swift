@@ -18,6 +18,9 @@ final class PostViewModel {
     private let authorizationCode: String
     private let service: PostService
     private var loadID = UUID()
+    private var isCreating = false
+    private var isUpdating = false
+    private var isDeleting = false
 
     var searchText = ""
     private(set) var submittedSearchText = ""
@@ -56,11 +59,13 @@ final class PostViewModel {
     }
 
     func createPost(title: String, content: String, author: String) async {
-        guard shouldLoadPosts,
+        guard !isCreating, shouldLoadPosts,
             !title.isEmpty, title.count <= 20,
             !content.isEmpty, content.count <= 1000,
             !author.isEmpty, author.count <= 20
         else { return }
+        isCreating = true
+        defer { isCreating = false }
         error = nil
         do {
             try await service.createPost(
@@ -76,6 +81,9 @@ final class PostViewModel {
     }
 
     func deletePost(_ post: PostItemModel) async {
+        guard !isDeleting else { return }
+        isDeleting = true
+        defer { isDeleting = false }
         error = nil
         do {
             if shouldLoadPosts {
@@ -91,9 +99,11 @@ final class PostViewModel {
     }
 
     func updatePost(_ post: PostItemModel, title: String, content: String) async {
-        guard title.count <= 20, content.count <= 1000,
+        guard !isUpdating, title.count <= 20, content.count <= 1000,
             title != post.title || content != post.content
         else { return }
+        isUpdating = true
+        defer { isUpdating = false }
         error = nil
         do {
             if shouldLoadPosts {

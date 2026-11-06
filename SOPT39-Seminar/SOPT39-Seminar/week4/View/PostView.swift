@@ -26,10 +26,7 @@ struct PostView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SearchTextField(text: $viewModel.searchText, onSearch: viewModel.search)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-
+            searchField
             postList
         }
         .background(Color(.white))
@@ -43,73 +40,113 @@ struct PostView: View {
             await viewModel.loadPosts()
         }
         .overlay(alignment: .bottomTrailing) {
-            FloatingButton {
-                editingPost = nil
-                title = ""
-                content = ""
-                isSheetPresented = true
-            }
-            .padding(.trailing, 16)
-            .padding(.bottom, 14)
+            floatingButton
         }
         .overlay {
-            if isDeleteModalPresented {
-                PostModal(isPresented: $isDeleteModalPresented) {
-                    isDeleteModalPresented = false
-                    if let deletingPost {
-                        Task { await viewModel.deletePost(deletingPost) }
-                    }
-                }
-            }
+            deleteModal
         }
         .sheet(isPresented: $isSheetPresented) {
-            PostBottomSheet(
-                title: $title,
-                content: $content,
-                initialPost: editingPost,
-                onSubmit: submitPost
-            )
+            postSheet
         }
+    }
+
+    private var searchField: some View {
+        SearchTextField(text: $viewModel.searchText, onSearch: viewModel.search)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
     }
 
     private var postList: some View {
         List(viewModel.displayedPosts) { post in
-            PostCard(
-                author: post.author,
-                date: post.date,
-                title: post.title,
-                content: post.content
-            )
-            .contentShape(RoundedRectangle(cornerRadius: 20))
-            .gesture(
-                LongPressGesture(minimumDuration: 0.5)
-                    .exclusively(before: TapGesture())
-                    .onEnded { value in
-                        switch value {
-                        case .first:
-                            deletingPost = post
-                            isDeleteModalPresented = true
-                        case .second:
-                            editingPost = post
-                            title = post.title
-                            content = post.content
-                            isSheetPresented = true
-                        }
-                    }
-            )
-            .listRowSeparator(.hidden)
-            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 12, trailing: 16))
-            .listRowBackground(Color(.white))
+            postRow(post)
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .scrollIndicators(.hidden)
         .overlay {
-            if viewModel.displayedPosts.isEmpty && !viewModel.submittedSearchText.isEmpty {
-                Text("검색 결과가 없습니다.")
-                    .font(.Medium(14))
-                    .foregroundStyle(Color(.gray3))
-            }
+            emptySearchMessage
+        }
+    }
+
+    private var floatingButton: some View {
+        FloatingButton(action: presentCreateSheet)
+            .padding(.trailing, 16)
+            .padding(.bottom, 14)
+    }
+
+    @ViewBuilder
+    private var deleteModal: some View {
+        if isDeleteModalPresented {
+            PostModal(isPresented: $isDeleteModalPresented, onDelete: deletePost)
+        }
+    }
+
+    private var postSheet: some View {
+        PostBottomSheet(
+            title: $title,
+            content: $content,
+            initialPost: editingPost,
+            onSubmit: submitPost
+        )
+    }
+
+    @ViewBuilder
+    private var emptySearchMessage: some View {
+        if viewModel.displayedPosts.isEmpty && !viewModel.submittedSearchText.isEmpty {
+            Text("검색 결과가 없습니다.")
+                .font(.Medium(14))
+                .foregroundStyle(Color(.gray3))
+        }
+    }
+
+    private func postRow(_ post: PostItemModel) -> some View {
+        PostCard(
+            author: post.author,
+            date: post.date,
+            title: post.title,
+            content: post.content
+        )
+        .contentShape(RoundedRectangle(cornerRadius: 20))
+        .gesture(
+            LongPressGesture(minimumDuration: 0.5)
+                .exclusively(before: TapGesture())
+                .onEnded { value in
+                    switch value {
+                    case .first:
+                        presentDeleteModal(for: post)
+                    case .second:
+                        presentEditSheet(for: post)
+                    }
+                }
+        )
+        .listRowSeparator(.hidden)
+        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 12, trailing: 16))
+        .listRowBackground(Color(.white))
+    }
+
+    private func presentCreateSheet() {
+        editingPost = nil
+        title = ""
+        content = ""
+        isSheetPresented = true
+    }
+
+    private func presentEditSheet(for post: PostItemModel) {
+        editingPost = post
+        title = post.title
+        content = post.content
+        isSheetPresented = true
+    }
+
+    private func presentDeleteModal(for post: PostItemModel) {
+        deletingPost = post
+        isDeleteModalPresented = true
+    }
+
+    private func deletePost() {
+        isDeleteModalPresented = false
+        if let deletingPost {
+            Task { await viewModel.deletePost(deletingPost) }
         }
     }
 
@@ -134,7 +171,6 @@ struct PostView: View {
             }
         }
     }
-
 }
 
 #Preview {

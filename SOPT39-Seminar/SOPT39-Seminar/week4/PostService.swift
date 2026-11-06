@@ -19,17 +19,8 @@ final class PostService {
     }
 
     func getPosts(keyword: String = "") async throws -> [PostItemModel] {
-        var request = try makeRequest()
-        if !keyword.isEmpty {
-            guard let requestURL = request.url,
-                var components = URLComponents(url: requestURL, resolvingAgainstBaseURL: false)
-            else {
-                throw NetworkError.urlError
-            }
-            components.queryItems = [URLQueryItem(name: "keyword", value: keyword)]
-            guard let url = components.url else { throw NetworkError.urlError }
-            request.url = url
-        }
+        let queryItems = keyword.isEmpty ? [] : [URLQueryItem(name: "keyword", value: keyword)]
+        let request = try makeRequest(method: "GET", queryItems: queryItems)
         let (data, response) = try await session.data(for: request)
         guard let response = response as? HTTPURLResponse else {
             throw NetworkError.responseError
@@ -55,12 +46,11 @@ final class PostService {
 
     func deletePost(id: Int, authorizationCode: String) async throws {
         guard id > 0 else { throw NetworkError.badRequest }
-        let code = authorizationCode
-        guard !code.isEmpty else { throw NetworkError.unauthorized }
-        var request = try makeRequest()
-        request.url = request.url?.appending(path: String(id))
-        request.httpMethod = "DELETE"
-        request.setValue(code, forHTTPHeaderField: "Authorization")
+        let request = try makeRequest(
+            method: "DELETE",
+            postID: id,
+            authorizationCode: authorizationCode
+        )
 
         let (data, response) = try await session.data(for: request)
         guard let response = response as? HTTPURLResponse else {
@@ -87,20 +77,18 @@ final class PostService {
         async throws
     {
         guard id > 0 else { throw NetworkError.badRequest }
-        let code = authorizationCode
-        guard !code.isEmpty else { throw NetworkError.unauthorized }
-        var request = try makeRequest()
-        request.url = request.url?.appending(path: String(id))
-        request.httpMethod = "PUT"
-        request.setValue(code, forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body: Data
         do {
-            request.httpBody = try JSONEncoder().encode(
-                PostUpdateRequestDTO(title: title, content: content)
-            )
+            body = try JSONEncoder().encode(PostUpdateRequestDTO(title: title, content: content))
         } catch {
             throw NetworkError.requestEncodingError
         }
+        let request = try makeRequest(
+            body: body,
+            method: "PUT",
+            postID: id,
+            authorizationCode: authorizationCode
+        )
         let (data, response) = try await session.data(for: request)
         guard let response = response as? HTTPURLResponse else {
             throw NetworkError.responseError
@@ -122,7 +110,13 @@ final class PostService {
         }
     }
 
-    private func makeRequest() throws -> URLRequest {
+    private func makeRequest(
+        body: Data? = nil,
+        method: String,
+        postID: Int? = nil,
+        queryItems: [URLQueryItem] = [],
+        authorizationCode: String? = nil
+    ) throws -> URLRequest {
         let configuredURL = (Bundle.main.object(forInfoDictionaryKey: "BASE_URL") as? String)
             .flatMap { URL(string: $0) }
         guard let url = baseURL ?? configuredURL,
@@ -130,9 +124,27 @@ final class PostService {
         else {
             throw NetworkError.urlError
         }
-        var request = URLRequest(url: url.appending(path: "api/v1/posts"))
-        request.httpMethod = "GET"
+
+        let path = postID.map { "api/v1/posts/\($0)" } ?? "api/v1/posts"
+        let endpointURL = url.appending(path: path)
+        guard var components = URLComponents(url: endpointURL, resolvingAgainstBaseURL: false)
+        else {
+            throw NetworkError.urlError
+        }
+        components.queryItems = queryItems.isEmpty ? nil : queryItems
+        guard let requestURL = components.url else { throw NetworkError.urlError }
+
+        var request = URLRequest(url: requestURL)
+        request.httpMethod = method
+        request.httpBody = body
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+        if body != nil {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
+        if let authorizationCode {
+            guard !authorizationCode.isEmpty else { throw NetworkError.unauthorized }
+            request.setValue(authorizationCode, forHTTPHeaderField: "Authorization")
+        }
         return request
     }
 }

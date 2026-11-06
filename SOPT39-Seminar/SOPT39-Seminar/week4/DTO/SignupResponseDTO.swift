@@ -12,7 +12,7 @@ struct SignupResponseDTO: Decodable {
     let code: String?
     let message: String?
     let data: AuthorizationCodeData?
-    
+
     struct AuthorizationCodeData: Decodable {
         let authorizationCode: String?
     }

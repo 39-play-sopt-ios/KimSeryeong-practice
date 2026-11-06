@@ -55,6 +55,26 @@ final class PostViewModel {
         }
     }
 
+    func createPost(title: String, content: String, author: String) async {
+        guard shouldLoadPosts,
+            !title.isEmpty, title.count <= 20,
+            !content.isEmpty, content.count <= 1000,
+            !author.isEmpty, author.count <= 20
+        else { return }
+        error = nil
+        do {
+            try await service.createPost(
+                title: title,
+                content: content,
+                author: author,
+                authorizationCode: authorizationCode
+            )
+            await loadPosts()
+        } catch {
+            self.error = error
+        }
+    }
+
     func deletePost(_ post: PostItemModel) async {
         error = nil
         do {

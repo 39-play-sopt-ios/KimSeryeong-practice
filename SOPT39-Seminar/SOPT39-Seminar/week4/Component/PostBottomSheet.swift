@@ -48,7 +48,8 @@ struct PostBottomSheet: View {
     private var isEnabled: Bool {
         title.count <= 20
             && content.count <= 1000
-            && (initialPost == nil || title != initialPost?.title
-                || content != initialPost?.content)
+            && (initialPost == nil
+                ? !title.isEmpty && !content.isEmpty
+                : title != initialPost?.title || content != initialPost?.content)
     }
 }

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct PostView: View {
+    private let author: String
     @State private var viewModel: PostViewModel
     @State private var isDeleteModalPresented = false
     @State private var deletingPost: PostItemModel?
@@ -16,7 +17,8 @@ struct PostView: View {
     @State private var content = ""
     @State private var isSheetPresented = false
 
-    init(posts: [PostItemModel]? = nil, authorizationCode: String = "") {
+    init(posts: [PostItemModel]? = nil, authorizationCode: String = "", author: String) {
+        self.author = author
         _viewModel = State(
             initialValue: PostViewModel(posts: posts, authorizationCode: authorizationCode)
         )
@@ -35,9 +37,14 @@ struct PostView: View {
             await viewModel.loadPosts()
         }
         .overlay(alignment: .bottomTrailing) {
-            FloatingButton { }
-                .padding(.trailing, 16)
-                .padding(.bottom, 14)
+            FloatingButton {
+                editingPost = nil
+                title = ""
+                content = ""
+                isSheetPresented = true
+            }
+            .padding(.trailing, 16)
+            .padding(.bottom, 14)
         }
         .overlay {
             if isDeleteModalPresented {
@@ -54,7 +61,7 @@ struct PostView: View {
                 title: $title,
                 content: $content,
                 initialPost: editingPost,
-                onSubmit: updatePost
+                onSubmit: submitPost
             )
         }
     }
@@ -100,21 +107,34 @@ struct PostView: View {
         }
     }
 
-    private func updatePost() {
-        guard let editingPost else { return }
-        let updatedTitle = title
-        let updatedContent = content
+    private func submitPost() {
+        let submittedTitle = title
+        let submittedContent = content
+        let postToEdit = editingPost
         isSheetPresented = false
         Task {
-            await viewModel.updatePost(editingPost, title: updatedTitle, content: updatedContent)
+            if let postToEdit {
+                await viewModel.updatePost(
+                    postToEdit,
+                    title: submittedTitle,
+                    content: submittedContent
+                )
+            } else {
+                await viewModel.createPost(
+                    title: submittedTitle,
+                    content: submittedContent,
+                    author: author
+                )
+            }
         }
     }
+
 }
 
 #Preview {
-    PostView(posts: PostItemModel.posts)
+    PostView(posts: PostItemModel.posts, author: "솝트")
 }
 
 #Preview("빈 목록") {
-    PostView(posts: [])
+    PostView(posts: [], author: "솝트")
 }

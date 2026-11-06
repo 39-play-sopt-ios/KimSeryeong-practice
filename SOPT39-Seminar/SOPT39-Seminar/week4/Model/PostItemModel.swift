@@ -36,7 +36,7 @@ extension PostItemModel {
                 author: "아모하는데",
                 date: "2026.11.04",
                 title: "글쓰기 테스트입니다 우냐야하뿌릿",
-                content: String(repeating: "본문입니다. ", count: 12).trimmingCharacters(
+                content: String(repeating: "본문입니다. ", count: 1).trimmingCharacters(
                     in: .whitespaces
                 )
             ),

@@ -44,6 +44,44 @@ final class PostService {
         return try postData.posts.map { try $0.toModel() }
     }
 
+    func createPost(title: String, content: String, author: String, authorizationCode: String)
+        async throws
+    {
+        let body: Data
+        do {
+            body = try JSONEncoder().encode(
+                PostCreateRequestDTO(title: title, content: content, author: author)
+            )
+        } catch {
+            throw NetworkError.requestEncodingError
+        }
+        let request = try makeRequest(
+            body: body,
+            method: "POST",
+            authorizationCode: authorizationCode
+        )
+        let (data, response) = try await session.data(for: request)
+        guard let response = response as? HTTPURLResponse else {
+            throw NetworkError.responseError
+        }
+        guard (200..<300).contains(response.statusCode) else {
+            if let result = try? JSONDecoder().decode(PostCreateResponseDTO.self, from: data) {
+                throw NetworkError.serverError(message: result.message)
+            }
+            throw NetworkError(statusCode: response.statusCode)
+        }
+        let result: PostCreateResponseDTO
+        do {
+            result = try JSONDecoder().decode(PostCreateResponseDTO.self, from: data)
+        } catch {
+            throw NetworkError.responseDecodingError
+        }
+        guard result.isSuccess else {
+            throw NetworkError.serverError(message: result.message)
+        }
+        guard result.data != nil else { throw NetworkError.responseError }
+    }
+
     func deletePost(id: Int, authorizationCode: String) async throws {
         guard id > 0 else { throw NetworkError.badRequest }
         let request = try makeRequest(

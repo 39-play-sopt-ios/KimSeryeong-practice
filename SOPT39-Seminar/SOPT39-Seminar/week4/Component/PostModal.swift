@@ -12,7 +12,9 @@ struct PostModal: View {
     let onDelete: () -> Void
 
     var body: some View {
-        Modal {
+        Modal(onDismiss: {
+            isPresented = false
+        }) {
             VStack(spacing: 20) {
                 Text("게시글을 삭제할까요?")
                     .font(.Medium(18))
@@ -26,7 +28,10 @@ struct PostModal: View {
                         isPresented = false
                     }
 
-                    CTAButton(title: "삭제", action: onDelete)
+                    CTAButton(
+                        title: "삭제",
+                        action: onDelete
+                    )
                 }
             }
         }

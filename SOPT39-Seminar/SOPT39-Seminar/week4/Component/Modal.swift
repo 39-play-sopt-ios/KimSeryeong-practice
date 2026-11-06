@@ -8,13 +8,14 @@
 import SwiftUI
 
 struct Modal<Content: View>: View {
+    var onDismiss: () -> Void = {}
     @ViewBuilder let content: () -> Content
 
     var body: some View {
         ZStack {
             Color(.black).opacity(0.4)
                 .ignoresSafeArea()
-                .onTapGesture { }
+                .onTapGesture(perform: onDismiss)
                 .accessibilityHidden(true)
 
             content()

@@ -10,7 +10,7 @@ import SwiftUI
 struct PostBottomSheet: View {
     @Binding var title: String
     @Binding var content: String
-    var isSubmitting: Bool = false
+    var initialPost: PostItemModel? = nil
     let onSubmit: () -> Void
 
     var body: some View {
@@ -46,10 +46,9 @@ struct PostBottomSheet: View {
     }
 
     private var isEnabled: Bool {
-        !isSubmitting
-            && !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && title.count <= 20
+        title.count <= 20
             && content.count <= 1000
+            && (initialPost == nil || title != initialPost?.title
+                || content != initialPost?.content)
     }
 }

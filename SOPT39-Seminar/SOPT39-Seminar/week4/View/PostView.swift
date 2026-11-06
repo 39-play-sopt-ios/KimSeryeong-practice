@@ -33,6 +33,12 @@ struct PostView: View {
             postList
         }
         .background(Color(.white))
+        .onChange(of: viewModel.searchText) { _, _ in
+            viewModel.scheduleSearch()
+        }
+        .onDisappear {
+            viewModel.cancelScheduledSearch()
+        }
         .task(id: viewModel.searchRevision) {
             await viewModel.loadPosts()
         }

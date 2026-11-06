@@ -18,6 +18,7 @@ final class PostViewModel {
     private let authorizationCode: String
     private let service: PostService
     private var loadID = UUID()
+    private var searchTask: Task<Void, Never>?
     private var isCreating = false
     private var isUpdating = false
     private var isDeleting = false
@@ -36,7 +37,26 @@ final class PostViewModel {
         self.service = service
     }
 
+    func scheduleSearch() {
+        cancelScheduledSearch()
+        searchTask = Task { [weak self] in
+            do {
+                try await Task.sleep(for: .milliseconds(300))
+                try Task.checkCancellation()
+            } catch {
+                return
+            }
+            self?.search()
+        }
+    }
+
+    func cancelScheduledSearch() {
+        searchTask?.cancel()
+        searchTask = nil
+    }
+
     func search() {
+        cancelScheduledSearch()
         submittedSearchText = searchText
         searchRevision += 1
     }
